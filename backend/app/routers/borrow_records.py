@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 import app.crud.crud as crud, app.schemas.schemas as schemas
 from app.db.database import get_db
-from app.dependencies.dependencies import get_current_user
+from app.dependencies.dependencies import get_current_admin, get_current_user
 from app.db.models import User
 
 router = APIRouter(prefix="/api/v1/borrow-records", tags=["borrow-records"])
@@ -54,6 +54,22 @@ def my_active_records_with_books(
     current_user: User = Depends(get_current_user),
 ):
     return crud.get_my_active_records_with_books(db, current_user)
+
+
+@router.get("/admin/active", response_model=list[schemas.BorrowRecordRead])
+def admin_active_records(
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_admin),
+):
+    return crud.get_admin_active_records(db)
+
+
+@router.get("/admin/overdue", response_model=list[schemas.BorrowRecordRead])
+def admin_overdue_records(
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_admin),
+):
+    return crud.get_admin_overdue_records(db)
 
 @router.get("/me/{record_id}/preview-fine", response_model=schemas.FinePreview)
 def preview_fine(
