@@ -197,6 +197,8 @@ def _serialize_borrow_record(record: models.BorrowRecord, include_live_fine: boo
     book_title = record.book.title if record.book else "Unknown"
     book_author = record.book.author if record.book else "Unknown"
     book_isbn = record.book.isbn if record.book else "Unknown"
+    borrower_name = record.user.name if record.user else None
+    borrower_email = record.user.email if record.user else None
 
     return {
         "id": record.id,
@@ -205,6 +207,8 @@ def _serialize_borrow_record(record: models.BorrowRecord, include_live_fine: boo
         "book_title": book_title,
         "book_author": book_author,
         "book_isbn": book_isbn,
+        "borrower_name": borrower_name,
+        "borrower_email": borrower_email,
         "borrow_date": borrow_date,
         "due_date": due_date,
         "return_date": return_date,
@@ -264,7 +268,10 @@ def get_my_records(db: Session, user: models.User):
     mark_overdue_records(db)
     records = (
         db.query(models.BorrowRecord)
-        .options(selectinload(models.BorrowRecord.book))
+        .options(
+            selectinload(models.BorrowRecord.book),
+            selectinload(models.BorrowRecord.user),
+        )
         .filter(models.BorrowRecord.user_id == user.id)
         .all()
     )
@@ -274,7 +281,10 @@ def get_my_overdue_records(db: Session, user: models.User):
     mark_overdue_records(db)
     records = (
         db.query(models.BorrowRecord)
-        .options(selectinload(models.BorrowRecord.book))
+        .options(
+            selectinload(models.BorrowRecord.book),
+            selectinload(models.BorrowRecord.user),
+        )
         .filter(
             models.BorrowRecord.user_id == user.id,
             models.BorrowRecord.status == models.BorrowStatus.OVERDUE.value,
@@ -287,13 +297,48 @@ def get_my_active_records(db: Session, user: models.User):
     mark_overdue_records(db)
     records = (
         db.query(models.BorrowRecord)
-        .options(selectinload(models.BorrowRecord.book))
+        .options(
+            selectinload(models.BorrowRecord.book),
+            selectinload(models.BorrowRecord.user),
+        )
         .filter(
             models.BorrowRecord.user_id == user.id,
             models.BorrowRecord.status.in_(
                 [models.BorrowStatus.BORROWED.value, models.BorrowStatus.OVERDUE.value]
             ),
         )
+        .all()
+    )
+    return [_serialize_borrow_record(record) for record in records]
+
+
+def get_admin_active_records(db: Session):
+    mark_overdue_records(db)
+    records = (
+        db.query(models.BorrowRecord)
+        .options(
+            selectinload(models.BorrowRecord.book),
+            selectinload(models.BorrowRecord.user),
+        )
+        .filter(
+            models.BorrowRecord.status.in_(
+                [models.BorrowStatus.BORROWED.value, models.BorrowStatus.OVERDUE.value]
+            ),
+        )
+        .all()
+    )
+    return [_serialize_borrow_record(record) for record in records]
+
+
+def get_admin_overdue_records(db: Session):
+    mark_overdue_records(db)
+    records = (
+        db.query(models.BorrowRecord)
+        .options(
+            selectinload(models.BorrowRecord.book),
+            selectinload(models.BorrowRecord.user),
+        )
+        .filter(models.BorrowRecord.status == models.BorrowStatus.OVERDUE.value)
         .all()
     )
     return [_serialize_borrow_record(record) for record in records]
@@ -353,7 +398,10 @@ def overdue_summary(db: Session, user: models.User):
     mark_overdue_records(db)
     records = (
         db.query(models.BorrowRecord)
-        .options(selectinload(models.BorrowRecord.book))
+        .options(
+            selectinload(models.BorrowRecord.book),
+            selectinload(models.BorrowRecord.user),
+        )
         .filter(
             models.BorrowRecord.user_id == user.id,
             models.BorrowRecord.status == models.BorrowStatus.OVERDUE.value,
