@@ -84,6 +84,8 @@ class BorrowRecordRead(ORMModel):
     book_title: str
     book_author: str
     book_isbn: str
+    borrower_name: Optional[str] = None
+    borrower_email: Optional[EmailStr] = None
     borrow_date: datetime
     due_date: datetime
     return_date: Optional[datetime] = None
