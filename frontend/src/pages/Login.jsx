@@ -42,7 +42,7 @@ export default function Login() {
       <p>Sign in to manage books and borrowing records.</p>
 
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
+        <label style={{ fontWeight: 600, fontSize: 14, display: "flex", flexDirection: "column", gap: 4 }}>
           Email
           <input
             type="email"
@@ -52,7 +52,8 @@ export default function Login() {
           />
         </label>
 
-        <label>
+
+        <label style={{ display: "flex", flexDirection: "column", gap: 4 , fontWeight: 600, fontSize: 14}}>
           Password
           <input
             type="password"

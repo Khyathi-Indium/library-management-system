@@ -37,12 +37,12 @@ export default function Register() {
       <p>Create your account to borrow and return books.</p>
 
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
+        <label style={{ fontWeight: 600, fontSize: 14, display: "flex", flexDirection: "column", gap: 4 }}>
           Full Name
           <input value={name} onChange={(event) => setName(event.target.value)} required />
         </label>
 
-        <label>
+        <label style={{ fontWeight: 600, fontSize: 14, display: "flex", flexDirection: "column", gap: 4 }}>
           Email
           <input
             type="email"
@@ -52,7 +52,7 @@ export default function Register() {
           />
         </label>
 
-        <label>
+        <label style={{ fontWeight: 600, fontSize: 14, display: "flex", flexDirection: "column", gap: 4 }}>
           Password
           <input
             type="password"
